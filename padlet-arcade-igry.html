@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Padlet Arcade: ігрові тренажери</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600;1,700&family=Raleway:wght@400;500;600;700&family=Marck+Script&display=swap&subset=cyrillic" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --cream:#FBF1C4;
+  --gold-dark:#8A5A00;
+  --gold:#C98A0B;
+  --gold-light:#E3A82A;
+  --gold-pale:#E9C45E;
+  --brown-deep:#4E2F18;
+  --brown:#6B3F1D;
+  --brown-light:#8A4A14;
+  --text:#3A2A10;
+  --text-mid:#5E4318;
+  --text-light:#7A5C26;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+body{
+  font-family:'Raleway',sans-serif;
+  min-height:100vh;
+  background:var(--cream);
+  color:var(--text);
+  position:relative;
+  overflow-x:hidden;
+}
+
+/* ── ATOM BG ── */
+.atom-bg{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+.atom-bg svg{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:min(960px,150vw);height:min(960px,150vw);
+  opacity:.09;
+}
+
+/* ── GRADIENT: ніжні жовті тони ── */
+.gradient-overlay{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 65% 55% at 8% 18%, rgba(240,205,100,.45) 0%, transparent 68%),
+    radial-gradient(ellipse 55% 65% at 92% 82%, rgba(244,215,120,.42) 0%, transparent 65%),
+    radial-gradient(ellipse 75% 65% at 50% 50%, rgba(253,246,214,.60) 0%, transparent 80%);
+}
+
+/* ── PAGE (компактно) ── */
+.page{
+  position:relative;z-index:1;
+  max-width:820px;margin:0 auto;
+  padding:26px 18px 40px;
+}
+
+/* ── HEADER ── */
+.header{text-align:center;margin-bottom:16px;}
+
+.arcade-logo{
+  display:inline-flex;flex-direction:column;
+  align-items:center;gap:4px;
+  margin-bottom:10px;
+}
+.arcade-icon{width:56px;height:56px;filter:drop-shadow(0 3px 8px rgba(78,47,24,.28));}
+.arcade-wordmark{
+  font-family:'Raleway',sans-serif;
+  font-weight:700;font-size:.9rem;
+  color:var(--gold-dark);
+  letter-spacing:2px;text-transform:uppercase;
+}
+
+/* ── ЗАГОЛОВОК: коричневий, Marck Script ── */
+.header h1{
+  font-family:'Marck Script',cursive;
+  font-weight:400;
+  font-size:clamp(2.5rem,6.5vw,3.8rem);
+  line-height:1.15;
+  margin-bottom:6px;
+  color:var(--brown-deep);
+  letter-spacing:.3px;
+  text-shadow:
+    0 1px 0 rgba(255,255,255,.45),
+    0 2px 6px rgba(78,47,24,.20);
+}
+.header h1 em{font-style:normal;color:var(--brown-light);}
+
+.header-desc{
+  max-width:680px;margin:8px auto 12px;
+  font-size:1.18rem;line-height:1.6;
+  color:var(--text-mid);font-weight:500;
+}
+
+/* ── DIVIDER ── */
+.divider{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.divider::before,.divider::after{
+  content:'';flex:1;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+}
+.divider-dot{width:7px;height:7px;border-radius:50%;background:var(--gold-dark);}
+
+/* ── СУЦІЛЬНИЙ СПИСОК без фону карток ── */
+.links-list{
+  display:flex;flex-direction:column;gap:0;
+  background:transparent;
+  border:none;
+  border-radius:0;
+  backdrop-filter:none;
+}
+
+/* ── РОЗДІЛИ: предмет і клас (окремий відтінок коричневого) ── */
+.subject-title{
+  font-family:'Marck Script',cursive;
+  font-weight:400;font-size:2.7rem;line-height:1.15;
+  color:#8E3510;
+  margin:24px 0 4px;
+  padding-bottom:4px;
+  border-bottom:2px solid rgba(142,53,16,.45);
+  text-shadow:0 1px 0 rgba(255,255,255,.55),0 2px 6px rgba(142,53,16,.18);
+}
+.subject-title:first-child{margin-top:4px;}
+.class-title{
+  display:block;
+  font-family:'Raleway',sans-serif;
+  font-weight:800;font-size:1.1rem;
+  color:var(--brown-deep);
+  margin:12px 0 2px 8px;
+}
+
+.link-card{
+  display:flex;align-items:center;gap:0;
+  background:transparent;
+  padding:7px 8px;
+  text-decoration:none;color:inherit;
+  transition:padding-left .2s;
+  border:none;
+  border-bottom:1px solid rgba(107,63,29,.20);
+}
+.link-card:last-child{border-bottom:none;}
+.link-card:hover{background:transparent;padding-left:16px;}
+
+.link-num{
+  font-family:'Cormorant Garamond',serif;
+  font-weight:700;font-size:1.9rem;
+  line-height:1;
+  color:var(--brown-light);
+  width:46px;flex-shrink:0;
+  text-align:center;padding-right:6px;
+}
+
+.link-body{flex:1;min-width:0;}
+
+/* ── НАЗВИ ТЕМ: коричневий, Marck Script, 1.95rem ── */
+.link-name{
+  font-family:'Marck Script',cursive;
+  font-weight:400;font-size:1.95rem;
+  color:var(--brown-deep);
+  line-height:1.2;display:block;
+  margin-bottom:1px;letter-spacing:.2px;
+  transition:color .15s;
+}
+.link-card:hover .link-name{color:var(--brown-light);}
+
+/* ── ПІДНАЗВА: предмет · клас ── */
+.link-tag{
+  font-size:.98rem;font-weight:600;
+  color:var(--text-mid);letter-spacing:.25px;
+}
+
+.link-arrow{
+  font-size:1.3rem;color:var(--brown-light);
+  flex-shrink:0;margin-left:10px;
+  transition:transform .18s, color .18s;
+}
+.link-card:hover .link-arrow{transform:translateX(5px);color:var(--brown-deep);}
+
+/* ── FOOTER ── */
+footer{
+  text-align:center;margin-top:28px;
+  font-family:'Cormorant Garamond',serif;
+  font-style:italic;font-weight:600;font-size:1.05rem;color:var(--text-light);
+}
+
+@media(max-width:560px){
+  .page{padding:18px 10px 36px;}
+  .link-name{font-size:1.55rem;}
+  .subject-title{font-size:2.15rem;}
+  .link-num{font-size:1.5rem;width:34px;}
+  .header-desc{font-size:1.08rem;}
+}
+</style>
+</head>
+<body>
+
+<div class="atom-bg">
+  <svg viewBox="0 0 900 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="450" cy="450" r="18" fill="#8A5A00"/>
+    <circle cx="450" cy="450" r="10" fill="#4E2F18"/>
+    <ellipse cx="450" cy="450" rx="340" ry="90" stroke="#8A5A00" stroke-width="1.2"/>
+    <ellipse cx="450" cy="450" rx="340" ry="90" stroke="#8A5A00" stroke-width="1.2" transform="rotate(60 450 450)"/>
+    <ellipse cx="450" cy="450" rx="340" ry="90" stroke="#8A5A00" stroke-width="1.2" transform="rotate(120 450 450)"/>
+    <circle cx="790" cy="450" r="9" fill="#C98A0B"/>
+    <circle cx="280" cy="266" r="9" fill="#C98A0B" transform="rotate(60 450 450)"/>
+    <circle cx="620" cy="634" r="9" fill="#C98A0B" transform="rotate(120 450 450)"/>
+    <circle cx="450" cy="450" r="400" stroke="#8A5A00" stroke-width=".5" stroke-dasharray="4 8"/>
+    <circle cx="450" cy="450" r="310" stroke="#8A5A00" stroke-width=".4" stroke-dasharray="2 10"/>
+    <circle cx="450" cy="450" r="200" stroke="#8A5A00" stroke-width=".4" stroke-dasharray="2 10"/>
+  </svg>
+</div>
+<div class="gradient-overlay"></div>
+
+<div class="page">
+  <header class="header">
+
+    <div class="arcade-logo">
+      <svg class="arcade-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- gamepad -->
+        <path d="M26 34 H74 C86 34 94 46 92 62 C91 72 86 78 79 78 C72 78 69 72 64 66 H36 C31 72 28 78 21 78 C14 78 9 72 8 62 C6 46 14 34 26 34 Z" fill="#6B3F1D"/>
+        <path d="M26 34 H74 C86 34 94 46 92 62 C91 72 86 78 79 78 C72 78 69 72 64 66 H36 C31 72 28 78 21 78 C14 78 9 72 8 62 C6 46 14 34 26 34 Z" fill="url(#ag)" opacity=".75"/>
+        <!-- d-pad -->
+        <rect x="23" y="46" width="22" height="7" rx="2" fill="#FBF1C4"/>
+        <rect x="30.5" y="38.5" width="7" height="22" rx="2" fill="#FBF1C4"/>
+        <!-- buttons -->
+        <circle cx="68" cy="45" r="5" fill="#FBF1C4"/>
+        <circle cx="79" cy="54" r="5" fill="#E3A82A"/>
+        <!-- star accent -->
+        <circle cx="50" cy="20" r="5" fill="#FFF1B8" opacity=".95"/>
+        <circle cx="50" cy="20" r="2.5" fill="#fff"/>
+        <defs>
+          <linearGradient id="ag" x1="8" y1="34" x2="92" y2="78" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#8A4A14"/>
+            <stop offset="100%" stop-color="#3E2410"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <span class="arcade-wordmark">Arcade</span>
+    </div>
+
+    <h1>Padlet Arcade:<br><em>ігрові тренажери</em></h1>
+
+    <p class="header-desc">
+      Інтерактивні ігри для закріплення знань з математики, фізики та астрономії: обирайте тему та вирушайте в гру.
+    </p>
+
+    <div class="divider"><div class="divider-dot"></div></div>
+  </header>
+
+  <div class="links-list">
+
+    <h2 class="subject-title">Математика</h2>
+    <h3 class="class-title">6 клас</h3>
+    <a class="link-card" href="https://arcade.padlet.com/game/RKnxZRdbj1?link_shared=1" target="_blank" rel="noopener">
+      <div class="link-body">
+        <span class="link-name">Властивості пропорції</span>
+        <span class="link-tag">Математика · 6 клас</span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+    <a class="link-card" href="https://arcade.padlet.com/game/GjJ6yllmjA?link_shared=1" target="_blank" rel="noopener">
+      <div class="link-body">
+        <span class="link-name">Відсотки</span>
+        <span class="link-tag">Математика · 6 клас</span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+    <a class="link-card" href="https://arcade.padlet.com/game/qpAYoQQ7pD?link_shared=1" target="_blank" rel="noopener">
+      <div class="link-body">
+        <span class="link-name">Задачі на відсотки</span>
+        <span class="link-tag">Математика · 6 клас</span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+    <a class="link-card" href="https://arcade.padlet.com/game/9LKlJqXojD?link_shared=1" target="_blank" rel="noopener">
+      <div class="link-body">
+        <span class="link-name">Задачі економічного змісту</span>
+        <span class="link-tag">Математика · 6 клас</span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+    <h3 class="class-title">7 клас</h3>
+    <a class="link-card" href="https://arcade.padlet.com/game/qpAYoQWBpD?link_shared=1" target="_blank" rel="noopener">
+      <div class="link-body">
+        <span class="link-name">Лінійні рівняння</span>
+        <span class="link-tag">Математика · 7 клас</span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+    <h3 class="class-title">8 клас</h3>
+    <a class="link-card" href="https://arcade.padlet.com/game/wK71kbNYjJ?link_shared=1" target="_blank" rel="noopener">
+      <div class="link-body">
+        <span class="link-name">Ознака подібності</span>
+        <span class="link-tag">Математика · 8 клас</span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+    <a class="link-card" href="https://arcade.padlet.com/game/kK4AWYzlrl?link_shared=1" target="_blank" rel="noopener">
+      <div class="link-body">
+        <span class="link-name">Чотирикутники</span>
+        <span class="link-tag">Математика · 8 клас</span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+    <a class="link-card" href="https://arcade.padlet.com/game/qrvOx6BAj1?link_shared=1" target="_blank" rel="noopener">
+      <div class="link-body">
+        <span class="link-name">Чотирикутники та їх властивості</span>
+        <span class="link-tag">Математика · 8 клас</span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+    <a class="link-card" href="https://arcade.padlet.com/game/3ZjO468EpO?link_shared=1" target="_blank" rel="noopener">
+      <div class="link-body">
+        <span class="link-name">Дії з раціональними числами</span>
+        <span class="link-tag">Математика · 8 клас</span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+    <a class="link-card" href="https://arcade.padlet.com/game/WvKP4Y4VKg?link_shared=1" target="_blank" rel="noopener">
+      <div class="link-body">
+        <span class="link-name">Властивості паралелограма</span>
+        <span class="link-tag">Математика · 8 клас</span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+    <h3 class="class-title">9 клас</h3>
+    <a class="link-card" href="https://arcade.padlet.com/game/Np2NAYmnpx?link_shared=1" target="_blank" rel="noopener">
+      <div class="link-body">
+        <span class="link-name">Вихідне діагностичне опитування з математики 9 клас</span>
+        <span class="link-tag">Математика · 8, 9 клас</span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+    <h2 class="subject-title">Фізика</h2>
+    <h3 class="class-title">7 клас</h3>
+    <a class="link-card" href="https://arcade.padlet.com/game/qpAYoQq7pD?link_shared=1" target="_blank" rel="noopener">
+      <div class="link-body">
+        <span class="link-name">Прямолінійний рівномірний рух. Швидкість</span>
+        <span class="link-tag">Фізика · 7 клас</span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+    <a class="link-card" href="https://arcade.padlet.com/game/GjxBP2bNK6?link_shared=1" target="_blank" rel="noopener">
+      <div class="link-body">
+        <span class="link-name">Механічний рух</span>
+        <span class="link-tag">Фізика · 7 клас</span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+    <a class="link-card" href="https://arcade.padlet.com/game/nlp8OobojX?link_shared=1" target="_blank" rel="noopener">
+      <div class="link-body">
+        <span class="link-name">Умови рівноваги</span>
+        <span class="link-tag">Фізика · 7 клас</span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+    <a class="link-card" href="https://arcade.padlet.com/game/YkK46G4Wjl?link_shared=1" target="_blank" rel="noopener">
+      <div class="link-body">
+        <span class="link-name">Умови рівноваги тіл</span>
+        <span class="link-tag">Фізика · 7 клас</span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+    <a class="link-card" href="https://arcade.padlet.com/game/0GjJWBzmpA?link_shared=1" target="_blank" rel="noopener">
+      <div class="link-body">
+        <span class="link-name">Закон Архімеда</span>
+        <span class="link-tag">Фізика · 7 клас</span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+    <a class="link-card" href="https://arcade.padlet.com/game/AXpGBlmVjw?link_shared=1" target="_blank" rel="noopener">
+      <div class="link-body">
+        <span class="link-name">Механічна робота. Механічна енергія</span>
+        <span class="link-tag">Фізика · 7 клас</span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+    <h3 class="class-title">8 клас</h3>
+    <a class="link-card" href="https://arcade.padlet.com/game/VKZGVw78rm?link_shared=1" target="_blank" rel="noopener">
+      <div class="link-body">
+        <span class="link-name">Температура</span>
+        <span class="link-tag">Фізика · 8 клас</span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+    <a class="link-card" href="https://arcade.padlet.com/game/5K5M8Y69KY?link_shared=1" target="_blank" rel="noopener">
+      <div class="link-body">
+        <span class="link-name">Таємниці агрегатних станів</span>
+        <span class="link-tag">Фізика · 8 клас</span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+    <a class="link-card" href="https://arcade.padlet.com/game/3qpAJNmnKD?link_shared=1" target="_blank" rel="noopener">
+      <div class="link-body">
+        <span class="link-name">Закони послідовного і паралельного з'єднань</span>
+        <span class="link-tag">Фізика · 8 клас</span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+    <a class="link-card" href="https://arcade.padlet.com/game/exjLERMopO?link_shared=1" target="_blank" rel="noopener">
+      <div class="link-body">
+        <span class="link-name">Плавлення і кристалізація</span>
+        <span class="link-tag">Фізика · 8 клас</span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+    <a class="link-card" href="https://arcade.padlet.com/game/Z4jVDdLxKw?link_shared=1" target="_blank" rel="noopener">
+      <div class="link-body">
+        <span class="link-name">Внутрішня енергія та теплообмін</span>
+        <span class="link-tag">Фізика · 8 клас</span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+    <h3 class="class-title">9 клас</h3>
+    <a class="link-card" href="https://arcade.padlet.com/game/6wK7wD6gKJ?link_shared=1" target="_blank" rel="noopener">
+      <div class="link-body">
+        <span class="link-name">Абетка кінематики</span>
+        <span class="link-tag">Фізика · 9 клас</span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+    <a class="link-card" href="https://arcade.padlet.com/game/bajyGaEkKN?link_shared=1" target="_blank" rel="noopener">
+      <div class="link-body">
+        <span class="link-name">Кінематика. Фізичний марафон</span>
+        <span class="link-tag">Фізика · 9 клас</span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+    <a class="link-card" href="https://arcade.padlet.com/game/nlp836NPjX?link_shared=1" target="_blank" rel="noopener">
+      <div class="link-body">
+        <span class="link-name">Магнітне поле</span>
+        <span class="link-tag">Фізика · 9 клас</span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+    <a class="link-card" href="https://arcade.padlet.com/game/M5K5JGGBrY?link_shared=1" target="_blank" rel="noopener">
+      <div class="link-body">
+        <span class="link-name">Другий закон Ньютона</span>
+        <span class="link-tag">Фізика · 9 клас</span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+    <a class="link-card" href="https://arcade.padlet.com/game/ZRKMgZwDjA?link_shared=1" target="_blank" rel="noopener">
+      <div class="link-body">
+        <span class="link-name">Магнітне поле</span>
+        <span class="link-tag">Фізика · 9 клас</span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+    <h2 class="subject-title">Астрономія</h2>
+    <h3 class="class-title">11 клас</h3>
+    <a class="link-card" href="https://arcade.padlet.com/game/aBKQV4y0rZ?link_shared=1" target="_blank" rel="noopener">
+      <div class="link-body">
+        <span class="link-name">Космічний навігатор</span>
+        <span class="link-tag">Астрономія · 11 клас</span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+    <a class="link-card" href="https://arcade.padlet.com/game/9LKl3X20pD?link_shared=1" target="_blank" rel="noopener">
+      <div class="link-body">
+        <span class="link-name">Зоряний класифікатор</span>
+        <span class="link-tag">Астрономія · 11 клас</span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+    <a class="link-card" href="https://arcade.padlet.com/game/zqrv5LXBK1?link_shared=1" target="_blank" rel="noopener">
+      <div class="link-body">
+        <span class="link-name">Молочний Шлях. Карти знань</span>
+        <span class="link-tag">Астрономія · 11 клас</span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+    <a class="link-card" href="https://arcade.padlet.com/game/9RKnNDWEK1?link_shared=1" target="_blank" rel="noopener">
+      <div class="link-body">
+        <span class="link-name">Зоряні величини</span>
+        <span class="link-tag">Астрономія · 11 клас</span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+    <a class="link-card" href="https://arcade.padlet.com/game/YkK4QqdMrl?link_shared=1" target="_blank" rel="noopener">
+      <div class="link-body">
+        <span class="link-name">Зоряний дослідник</span>
+        <span class="link-tag">Астрономія · 11 клас</span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+    <h2 class="subject-title">Безпека дорожнього руху</h2>
+    <a class="link-card" href="https://arcade.padlet.com/game/06r0A6QZj7?link_shared=1" target="_blank" rel="noopener">
+      <div class="link-body">
+        <span class="link-name">Дорожні знаки щодня</span>
+        <span class="link-tag">Безпека дорожнього руху</span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+
+  </div>
+
+  <footer>© Алла Сиянко · Вищетарасівський ліцей · Методичний хаб</footer>
+</div>
+
+</body>
+</html>
